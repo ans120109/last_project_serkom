@@ -13,7 +13,7 @@ class EkstrakurikulerController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user || !in_array($user->role, ['admin', 'guru'], true)) {
+        if (!$user || !in_array($user->role, ['admin', 'operator'], true)) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }
     }

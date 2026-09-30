@@ -8,9 +8,8 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\EkstrakurikulerController;
 use App\Http\Controllers\BeritaController;
 use App\Http\Controllers\DataUserController;
+use App\Http\Controllers\ProfilSekolahController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\SiswaGuruController;
-
 
 // =====================================================
 // HOME / AKADEMIK
@@ -64,9 +63,26 @@ Route::get('/profile', function () {
 // PROFILE SEKOLAH
 // =====================================================
 
-Route::get('/profile-sekolah', function () {
-    return view('profile-sekolah');
-})->name('profile-sekolah');
+// Bisa dilihat semua orang
+Route::get('/profile-sekolah', [
+    ProfilSekolahController::class,
+    'index'
+])->name('profile-sekolah');
+
+
+// Hanya ADMIN dan OPERATOR
+Route::middleware(['auth', 'role:admin,operator'])->group(function () {
+
+    Route::get('/profile-sekolah/edit', [
+        ProfilSekolahController::class,
+        'edit'
+    ])->name('profile-sekolah.edit');
+
+    Route::put('/profile-sekolah', [
+        ProfilSekolahController::class,
+        'update'
+    ])->name('profile-sekolah.update');
+});
 
 
 // =====================================================
@@ -170,13 +186,19 @@ Route::middleware('auth')
         // =================================================
 
         Route::resource('users', UserController::class);
+    });
 
 
-        // =================================================
-        // DATA SISWA & GURU LAMA
-        // =================================================
+// =====================================================
+// DATA SISWA & GURU
+// =====================================================
 
-        Route::get('/tambah', [
+Route::middleware('auth')
+    ->prefix('siswa-guru')
+    ->name('siswa-guru.')
+    ->group(function () {
+
+        Route::get('/', [
             DataUserController::class,
             'create'
         ])->name('create');
@@ -226,11 +248,3 @@ Route::middleware('auth')
             'destroyGuru'
         ])->name('guru.destroy');
     });
-
-
-// =====================================================
-// SISWA & GURU
-// =====================================================
-
-// Menu ini menggunakan SiswaGuruController
-Route::resource('siswa-guru', SiswaGuruController::class);

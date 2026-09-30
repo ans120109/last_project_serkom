@@ -3,10 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -33,6 +31,19 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
 
+            // Akun berstatus nonaktif tidak boleh masuk
+            if (Auth::user()->isInactive()) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()
+                    ->withErrors([
+                        'username' => 'Akun Anda tidak aktif. Hubungi admin.',
+                    ])
+                    ->withInput($request->only('username'));
+            }
+
             // Membuat session baru setelah login
             $request->session()->regenerate();
 
@@ -46,64 +57,6 @@ class LoginController extends Controller
                 'username' => 'Username atau password salah.',
             ])
             ->withInput($request->only('username'));
-    }
-
-
-    // =====================================
-    // MENAMPILKAN HALAMAN REGISTER
-    // =====================================
-
-    public function showRegisterForm()
-    {
-        return view('auth.register');
-    }
-
-
-    // =====================================
-    // PROSES REGISTER
-    // =====================================
-
-    public function register(Request $request)
-    {
-        // Validasi
-        $request->validate([
-            'name' => 'required|string|max:255',
-
-            'username' => [
-                'required',
-                'string',
-                'max:255',
-                'unique:users,username'
-            ],
-
-            'password' => [
-                'required',
-                'min:6',
-                'confirmed'
-            ],
-        ]);
-
-
-        // Membuat user baru
-        User::create([
-            'name' => $request->name,
-
-            'username' => $request->username,
-
-            'password' => Hash::make($request->password),
-
-            'role' => 'guru',
-        ]);
-
-
-        // Setelah berhasil register,
-        // arahkan ke halaman login
-        return redirect()
-            ->route('login')
-            ->with(
-                'success',
-                'Registrasi berhasil! Silakan login.'
-            );
     }
 
 

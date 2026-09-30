@@ -18,11 +18,9 @@ return new class extends Migration
             // $table->timestamp('username_verified_at')->nullable();
             $table->string('password');
 
-            // Tambahkan kolom role untuk membedakan hak akses
-            // Pilihannya: 'admin', 'guru', atau 'siswa'
+            // Kolom role untuk membedakan hak akses.
+            // Nilainya diperbarui lagi oleh migrasi 2026_09_28_063458_update_role_column_in_users_table.
             $table->enum('role', ['admin', 'guru', 'siswa'])->default('siswa');
-            $table->string('role')->default('siswa')->after('password');
-            $table->enum('status',['aktif', 'tidak aktif'])->default('aktif')->after('role');
             $table->rememberToken();
             $table->timestamps();
         });
@@ -51,9 +49,5 @@ return new class extends Migration
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
-           Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('role');
-            $table->dropColumn('status');
-        });
     }
 };

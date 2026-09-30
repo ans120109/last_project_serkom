@@ -28,6 +28,12 @@
     .btn-batal { background: #e5e7eb; color: #374151 !important; }
     .btn-batal:hover { background: #d1d5db; }
 
+    .info-penulis { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;
+                    padding: 14px 16px; margin-bottom: 22px; font-size: 14px; color: #1e3a8a;
+                    line-height: 1.7; }
+    .info-penulis strong { color: #1e40af; }
+    .info-penulis .judul-info { font-weight: 700; display: block; margin-bottom: 2px; }
+
     @media (max-width: 600px) {
         .form-row { grid-template-columns: 1fr; }
         .form-card { padding: 20px; }
@@ -40,6 +46,14 @@
     <p class="page-subtitle">Tambahkan informasi terbaru untuk siswa dan sekolah.</p>
 
     <div class="form-card">
+        <div class="info-penulis">
+            <span class="judul-info">Data penginput — tersimpan otomatis</span>
+            Diinput oleh: <strong>{{ auth()->user()->name }}</strong>
+            ({{ auth()->user()->username }})<br>
+            Tanggal input: <strong>{{ now()->translatedFormat('d F Y, H:i') }}</strong>
+            &mdash; waktu pasti dicatat server saat tombol Simpan ditekan.
+        </div>
+
         <form action="{{ route('berita.store') }}" method="POST">
             @csrf
 
@@ -57,8 +71,8 @@
                     <select id="jenis" name="jenis"
                             class="form-control @error('jenis') is-invalid @enderror" required>
                         <option value="">-- Pilih Jenis --</option>
-                        <option value="berita" {{ old('jenis') === 'berita' ? 'selected' : '' }}>Berita</option>
-                        <option value="pengumuman" {{ old('jenis') === 'pengumuman' ? 'selected' : '' }}>Pengumuman</option>
+                        <option value="Berita" {{ old('jenis') === 'Berita' ? 'selected' : '' }}>Berita</option>
+                        <option value="Pengumuman" {{ old('jenis') === 'Pengumuman' ? 'selected' : '' }}>Pengumuman</option>
                     </select>
                     @error('jenis') <div class="error-text">{{ $message }}</div> @enderror
                 </div>

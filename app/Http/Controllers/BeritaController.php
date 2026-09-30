@@ -9,7 +9,9 @@ class BeritaController extends Controller
 {
     public function index()
     {
-        $berita = Berita::orderBy('tanggal', 'desc')->get();
+        $berita = Berita::with('penulis')
+            ->orderBy('tanggal', 'desc')
+            ->get();
 
         return view('berita', compact('berita'));
     }
@@ -28,7 +30,11 @@ class BeritaController extends Controller
             'isi' => 'required|string',
         ]);
 
-        Berita::create($validated);
+        Berita::create($validated + [
+            // Diambil dari session login, bukan dari input form,
+            // supaya penulis tidak bisa dipalsukan lewat request.
+            'id_user' => $request->user()->id,
+        ]);
 
         return redirect()
             ->route('berita')
@@ -37,6 +43,8 @@ class BeritaController extends Controller
 
     public function edit(Berita $berita)
     {
+        $berita->load('penulis');
+
         return view('berita.edit', compact('berita'));
     }
 

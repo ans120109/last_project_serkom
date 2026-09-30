@@ -8,8 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Dijaga dengan hasColumn agar database lama yang sudah punya kolom
+        // status dari migrasi awal tidak gagal saat migrasi ini dijalankan.
+        if (Schema::hasColumn('users', 'status')) {
+            return;
+        }
+
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('status', ['aktif', 'tidak_aktif'])
+            $table->enum('status', ['aktif', 'nonaktif'])
                   ->default('aktif')
                   ->after('role');
         });

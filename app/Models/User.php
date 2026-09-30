@@ -10,37 +10,30 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-
     protected $fillable = [
-
         'name',
-
         'username',
-
-        'role',
-
-        'status',
-
         'password',
-
+        'role',
+        'status',
+        'last_active_at',
     ];
-
 
     protected $hidden = [
-
         'password',
-
         'remember_token',
-
     ];
-
 
     protected function casts(): array
     {
         return [
-
-            'password' => 'hashed',
-
+            'password'       => 'hashed',
+            'last_active_at' => 'datetime',
         ];
+    }
+
+    public function isInactive(): bool
+    {
+        return ! in_array(strtolower((string) $this->status), ['aktif', 'active', '1'], true);
     }
 }

@@ -78,7 +78,8 @@
 
             {{-- Data Siswa & Guru --}}
             <li>
-                <a href="#">
+                <a href="{{ route('siswa-guru.create') }}"
+                    class="{{ request()->routeIs('siswa-guru.*') ? 'active' : '' }}">
                     Data Siswa & Guru
                 </a>
             </li>
