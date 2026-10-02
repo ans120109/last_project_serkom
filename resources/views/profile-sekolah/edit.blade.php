@@ -1,116 +1,138 @@
 @extends('layout.app')
 
-@section('title', 'Edit Profil Sekolah')
-
-@push('styles')
-<style>
-    .pse-wrap { max-width: 620px; margin: 0 auto; }
-    .content .pse-wrap h1 { font-size: 26px; font-weight: 700; color: #0b1a3f; margin-bottom: 20px; }
-    .pse-card { background: #fff; border-radius: 12px; padding: 26px; box-shadow: 0 1px 6px rgba(0,0,0,.07); }
-    .pse-group { margin-bottom: 16px; }
-    .pse-group label { display: block; font-size: 13px; font-weight: 700; color: #0b1a3f; margin-bottom: 6px; }
-    .pse-group label small { font-weight: 400; color: #777; }
-    .pse-group input[type=text], .pse-group input[type=number], .pse-group textarea, .pse-group input[type=file] {
-        width: 100%; padding: 10px 12px; border: 1px solid #d4d8e0; border-radius: 8px;
-        font-size: 14px; font-family: inherit; background: #fff; }
-    .pse-group input:focus, .pse-group textarea:focus { outline: none; border-color: #e8a317; }
-    .pse-error { color: #b91c1c; font-size: 12px; margin-top: 4px; }
-    .pse-preview { display: block; max-width: 100%; width: 320px; margin-top: 10px; border-radius: 10px; }
-    .pse-check { margin-top: 8px; font-size: 13px; color: #444; }
-    .pse-check input { margin-right: 6px; }
-    .pse-actions { display: flex; gap: 10px; margin-top: 8px; }
-    .pse-btn { padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 14px; border: 0;
-        cursor: pointer; text-decoration: none; display: inline-block; }
-    .pse-btn-primary { background: #12234f; color: #fff; }
-    .pse-btn-secondary { background: #e9ecf3; color: #333; }
-</style>
-@endpush
+@section('title', 'Edit Profile Sekolah')
 
 @section('content')
-<div class="pse-wrap">
-    <h1>Edit Profil Sekolah</h1>
-
-    @if($errors->any())
-        <div class="alert alert-danger">
-            <strong>Data belum bisa disimpan:</strong>
-            <ul>
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+<main class="content">
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div>
+                <h1 class="page-title">Edit Profil Sekolah</h1>
+                <p class="page-subtitle">Perbarui informasi sekolah.</p>
+            </div>
+            <a href="{{ route('profile-sekolah') }}" class="btn-action" style="background:#6c757d;">
+                ← Kembali
+            </a>
         </div>
-    @endif
 
-    <div class="pse-card">
-        <form action="{{ route('profile-sekolah.update') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            @method('PUT')
+        <hr class="divider">
 
-            <div class="pse-group">
-                <label for="nama">Nama Sekolah</label>
-                <input type="text" id="nama" name="nama" value="{{ old('nama', $profil->nama) }}" required>
+        @if ($errors->any())
+            <div style="background:#f8d7da; color:#721c24; padding:12px 16px; border-radius:5px; margin-bottom:16px; border-left:4px solid #dc3545;">
+                <strong>Data belum bisa disimpan:</strong>
+                <ul style="margin:8px 0 0 0; padding-left:20px;">
+                    @foreach ($errors->all() as $err)
+                        <li>{{ $err }}</li>
+                    @endforeach
+                </ul>
             </div>
+        @endif
 
-            <div class="pse-group">
-                <label for="alamat">Alamat</label>
-                <input type="text" id="alamat" name="alamat" value="{{ old('alamat', $profil->alamat) }}" required>
-            </div>
+        <div class="card">
+            <form action="{{ route('profile-sekolah.update') }}"
+                  method="POST"
+                  enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
 
-            <div class="pse-group">
-                <label for="jenjang">Jenjang</label>
-                <input type="text" id="jenjang" name="jenjang" value="{{ old('jenjang', $profil->jenjang) }}" required>
-            </div>
-
-            <div class="pse-group">
-                <label for="tahun_berdiri">Tahun Berdiri</label>
-                <input type="number" id="tahun_berdiri" name="tahun_berdiri"
-                       value="{{ old('tahun_berdiri', $profil->tahun_berdiri) }}" required>
-            </div>
-
-            <div class="pse-group">
-                <label for="jumlah_siswa">Jumlah Siswa</label>
-                <input type="number" id="jumlah_siswa" name="jumlah_siswa" min="0"
-                       value="{{ old('jumlah_siswa', $profil->jumlah_siswa) }}" required>
-            </div>
-
-            <div class="pse-group">
-                <label for="prestasi">Prestasi <small>(satu prestasi per baris)</small></label>
-                <textarea id="prestasi" name="prestasi" rows="5">{{ old('prestasi', $profil->prestasi) }}</textarea>
-            </div>
-
-            <div class="pse-group">
-                <label for="foto">Foto Sekolah <small>(JPG/PNG/WEBP, maks 2 MB)</small></label>
-                <input type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/webp">
-                @error('foto') <p class="pse-error">{{ $message }}</p> @enderror
-
-                <img id="preview" class="pse-preview" alt="Preview foto"
-                     src="{{ $profil->foto_url }}"
-                     style="{{ $profil->foto ? '' : 'display:none;' }}">
-
-                @if($profil->foto)
-                    <label class="pse-check">
-                        <input type="checkbox" name="hapus_foto" value="1"> Hapus foto saat ini
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px;">
+                        Nama Sekolah <span style="color:red;">*</span>
                     </label>
-                @endif
-            </div>
+                    <input type="text"
+                           name="nama_sekolah"
+                           value="{{ old('nama_sekolah', $profil->nama_sekolah) }}"
+                           required
+                           style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                </div>
 
-            <div class="pse-actions">
-                <button type="submit" class="pse-btn pse-btn-primary">Simpan</button>
-                <a href="{{ route('profile-sekolah') }}" class="pse-btn pse-btn-secondary">Batal</a>
-            </div>
-        </form>
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px;">Alamat</label>
+                    <input type="text"
+                           name="alamat"
+                           value="{{ old('alamat', $profil->alamat) }}"
+                           style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px;">Jenjang</label>
+                    <input type="text"
+                           name="jenjang"
+                           value="{{ old('jenjang', $profil->jenjang) }}"
+                           style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px;">Tahun Berdiri</label>
+                    <input type="text"
+                           name="tahun_berdiri"
+                           value="{{ old('tahun_berdiri', $profil->tahun_berdiri) }}"
+                           style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px;">Jumlah Siswa</label>
+                    <input type="number"
+                           name="jumlah_siswa"
+                           value="{{ old('jumlah_siswa', $profil->jumlah_siswa) }}"
+                           min="0"
+                           style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px;">
+                        Prestasi <span style="color:#888; font-weight:400;">(satu prestasi per baris)</span>
+                    </label>
+                    <textarea name="prestasi" rows="4"
+                              style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">{{ old('prestasi', $profil->prestasi) }}</textarea>
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px;">Tentang Sekolah</label>
+                    <textarea name="tentang" rows="4"
+                              style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">{{ old('tentang', $profil->tentang) }}</textarea>
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px;">Visi</label>
+                    <textarea name="visi" rows="2"
+                              style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">{{ old('visi', $profil->visi) }}</textarea>
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px;">
+                        Misi <span style="color:#888; font-weight:400;">(satu misi per baris)</span>
+                    </label>
+                    <textarea name="misi" rows="4"
+                              style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">{{ old('misi', $profil->misi) }}</textarea>
+                </div>
+
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px;">
+                        Foto Sekolah <span style="color:#888; font-weight:400;">(JPG/PNG/WEBP, maks 2 MB)</span>
+                    </label>
+                    <input type="file"
+                           name="foto"
+                           accept="image/*"
+                           style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; background:#fafafa;">
+
+                    @if ($profil->foto)
+                        <div style="margin-top:12px;">
+                            <p class="muted" style="font-size:13px; margin-bottom:6px;">Foto saat ini:</p>
+                            <img src="{{ asset('storage/' . $profil->foto) }}"
+                                 style="max-height:180px; border-radius:6px; border:1px solid #ddd;">
+                        </div>
+                    @endif
+                </div>
+
+                <div class="action-buttons" style="margin-top:20px; padding-top:16px; border-top:1px solid #eee;">
+                    <button type="submit" class="btn-action">💾 Simpan</button>
+                    <a href="{{ route('profile-sekolah') }}" class="btn-action" style="background:#6c757d;">Batal</a>
+                </div>
+
+            </form>
+        </div>
+
     </div>
-</div>
+</main>
 @endsection
-
-@push('scripts')
-<script>
-    document.getElementById('foto').addEventListener('change', function (e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const img = document.getElementById('preview');
-        img.src = URL.createObjectURL(file);
-        img.style.display = 'block';
-    });
-</script>
-@endpush

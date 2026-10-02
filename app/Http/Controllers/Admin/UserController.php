@@ -10,132 +10,94 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | DAFTAR USER
-    |--------------------------------------------------------------------------
-    */
-
     public function index()
     {
-        $users = User::orderBy('name')->get();
-
+        $users = User::latest()->get();
         return view('admin.users.index', compact('users'));
     }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | FORM TAMBAH USER
-    |--------------------------------------------------------------------------
-    */
 
     public function create()
     {
         return view('admin.users.create');
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | SIMPAN USER BARU
-    |--------------------------------------------------------------------------
-    */
-
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255', 'unique:users,username'],
-            'role'     => ['required', 'in:siswa,operator,admin'],
-            'status'   => ['required', 'in:aktif,nonaktif'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        $request->validate([
+            'name'      => 'required|string|max:100',
+            'username'  => 'required|string|max:50|unique:users,username',
+            'password'  => 'required|string|min:6|confirmed',
+            'role'      => 'required|in:admin,operator,user',
+            'is_active' => 'required|boolean',
         ]);
 
         User::create([
-            'name'     => $validated['name'],
-            'username' => $validated['username'],
-            'role'     => $validated['role'],
-            'status'   => $validated['status'],
-            'password' => Hash::make($validated['password']),
+            'name'      => $request->name,
+            'username'  => $request->username,
+            'password'  => Hash::make($request->password),
+            'role'      => $request->role,
+            'is_active' => $request->boolean('is_active'),
         ]);
 
-        return redirect()
-            ->route('admin.users.index')
+        return redirect()->route('admin.users.index')
             ->with('success', 'User berhasil ditambahkan.');
     }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | DETAIL USER
-    |--------------------------------------------------------------------------
-    */
 
     public function show(User $user)
     {
         return view('admin.users.show', compact('user'));
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | FORM EDIT USER
-    |--------------------------------------------------------------------------
-    */
-
     public function edit(User $user)
     {
         return view('admin.users.edit', compact('user'));
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE USER
-    |--------------------------------------------------------------------------
-    */
-
     public function update(Request $request, User $user)
     {
-        $validated = $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255', 'unique:users,username,' . $user->id],
-            'role'     => ['required', 'in:siswa,operator,admin'],
-            'status'   => ['required', 'in:aktif,nonaktif'],
+        $request->validate([
+            'name'      => 'required|string|max:100',
+            'username'  => 'required|string|max:50|unique:users,username,' . $user->id,
+            'password'  => 'nullable|string|min:6|confirmed',
+            'role'      => 'required|in:admin,operator,user',
+            'is_active' => 'required|boolean',
         ]);
 
-        $user->update([
-            'name'     => $validated['name'],
-            'username' => $validated['username'],
-            'role'     => $validated['role'],
-            'status'   => $validated['status'],
-        ]);
+        if (Auth::user()?->role === 'operator' && $user->role === 'admin') {
+            return redirect()->back()
+                ->with('error', 'Operator tidak bisa mengedit akun admin.');
+        }
 
-        return redirect()
-            ->route('admin.users.index')
-            ->with('success', 'Data user berhasil diperbarui.');
+        $data = [
+            'name'     => $request->name,
+            'username' => $request->username,
+            'role'     => $request->role,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        if (Auth::user()?->role !== 'operator' || $user->role !== 'admin') {
+            $data['is_active'] = $request->boolean('is_active');
+        }
+
+        $user->update($data);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User berhasil diperbarui.');
     }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | HAPUS USER
-    |--------------------------------------------------------------------------
-    */
 
     public function destroy(User $user)
     {
-        if ((int) $user->getKey() === (int) Auth::id()) {
-            return back()->with('error', 'Anda tidak bisa menghapus akun sendiri.');
-        }
-
-        if (! $user->isInactive()) {
-            return back()->with('error', 'Akun ini masih aktif. Ubah statusnya menjadi tidak aktif terlebih dahulu.');
+        if ($user->id === Auth::id()) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Anda tidak bisa menghapus akun sendiri.');
         }
 
         $user->delete();
 
-        return back()->with('success', 'Akun pengguna berhasil dihapus.');
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User berhasil dihapus.');
     }
 }

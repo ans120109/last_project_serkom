@@ -12,16 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
 
+        // Daftarkan alias middleware
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
-        ]);
-
-        $middleware->web(append: [
-            \App\Http\Middleware\UpdateLastActive::class,
         ]);
 
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })
-    ->create();
+    })->create();

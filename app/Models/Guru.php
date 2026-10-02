@@ -2,10 +2,27 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Guru extends Model
 {
-    //
-     protected $fillable = ['nama', 'nip', 'mata_pelajaran', 'no_hp'];
+    use HasFactory;
+
+    protected $table = 'guru';
+
+    protected $fillable = [
+        'nip',
+        'nama',
+        'jenis_kelamin',
+        'mata_pelajaran',
+        'jabatan',
+        'tanggal_lahir',
+        'alamat',
+        'no_hp',
+    ];
+
+    protected $casts = [
+        'tanggal_lahir' => 'date',
+    ];
 }

@@ -2,31 +2,24 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Berita extends Model
 {
+    use HasFactory;
+
     protected $table = 'berita';
 
     protected $fillable = [
-
         'judul',
-        'tanggal',
         'isi',
-        'jenis',
-        'id_user',
-
+        'foto',
+        'penulis',
+        'tanggal',
     ];
 
     protected $casts = [
-        'tanggal' => 'date'
+        'tanggal' => 'date',
     ];
-
-    /**
-     * User yang menginput berita ini.
-     */
-    public function penulis()
-    {
-        return $this->belongsTo(User::class, 'id_user', 'id');
-    }
 }

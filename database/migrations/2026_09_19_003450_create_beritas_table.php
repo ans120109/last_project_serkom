@@ -11,12 +11,10 @@ return new class extends Migration
         Schema::create('berita', function (Blueprint $table) {
             $table->id();
             $table->string('judul');
-            $table->date('tanggal');
             $table->text('isi');
-            $table->enum('jenis', [
-                'Berita',
-                'Pengumuman'
-            ])->default('Berita');
+            $table->string('foto')->nullable();
+            $table->string('penulis')->nullable();
+            $table->date('tanggal')->nullable();
             $table->timestamps();
         });
     }

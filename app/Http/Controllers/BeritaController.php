@@ -4,15 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Berita;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class BeritaController extends Controller
 {
     public function index()
     {
-        $berita = Berita::with('penulis')
-            ->orderBy('tanggal', 'desc')
-            ->get();
-
+        $berita = Berita::latest()->get();
         return view('berita', compact('berita'));
     }
 
@@ -23,53 +21,71 @@ class BeritaController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'tanggal' => 'required|date',
-            'jenis' => 'required|in:Berita,Pengumuman',
-            'isi' => 'required|string',
+        $request->validate([
+            'judul'   => 'required|string|max:255',
+            'isi'     => 'required|string',
+            'foto'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'penulis' => 'nullable|string|max:100',
+            'tanggal' => 'nullable|date',
         ]);
 
-        Berita::create($validated + [
-            // Diambil dari session login, bukan dari input form,
-            // supaya penulis tidak bisa dipalsukan lewat request.
-            'id_user' => $request->user()->id,
-        ]);
+        $data = $request->only(['judul', 'isi', 'penulis', 'tanggal']);
 
-        return redirect()
-            ->route('berita')
+        if ($request->hasFile('foto')) {
+            $data['foto'] = $request->file('foto')->store('berita', 'public');
+        }
+
+        Berita::create($data);
+
+        return redirect()->route('berita.index')
             ->with('success', 'Berita berhasil ditambahkan.');
+    }
+
+    public function show(Berita $berita)
+    {
+        return view('berita.show', compact('berita'));
     }
 
     public function edit(Berita $berita)
     {
-        $berita->load('penulis');
-
         return view('berita.edit', compact('berita'));
     }
 
     public function update(Request $request, Berita $berita)
     {
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'tanggal' => 'required|date',
-            'jenis' => 'required|in:Berita,Pengumuman',
-            'isi' => 'required|string',
+        $request->validate([
+            'judul'   => 'required|string|max:255',
+            'isi'     => 'required|string',
+            'foto'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'penulis' => 'nullable|string|max:100',
+            'tanggal' => 'nullable|date',
         ]);
 
-        $berita->update($validated);
+        $data = $request->only(['judul', 'isi', 'penulis', 'tanggal']);
 
-        return redirect()
-            ->route('berita')
+        if ($request->hasFile('foto')) {
+            // Hapus foto lama
+            if ($berita->foto && Storage::disk('public')->exists($berita->foto)) {
+                Storage::disk('public')->delete($berita->foto);
+            }
+            $data['foto'] = $request->file('foto')->store('berita', 'public');
+        }
+
+        $berita->update($data);
+
+        return redirect()->route('berita.index')
             ->with('success', 'Berita berhasil diperbarui.');
     }
 
     public function destroy(Berita $berita)
     {
+        if ($berita->foto && Storage::disk('public')->exists($berita->foto)) {
+            Storage::disk('public')->delete($berita->foto);
+        }
+
         $berita->delete();
 
-        return redirect()
-            ->route('berita')
+        return redirect()->route('berita.index')
             ->with('success', 'Berita berhasil dihapus.');
     }
 }

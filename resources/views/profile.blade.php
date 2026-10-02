@@ -1,50 +1,58 @@
 @extends('layout.app')
 
-@section('title', 'Profil Pengguna - Panel Sekolah')
+@section('title', 'Profil')
 
 @section('content')
-<div class="container" style="max-width: 500px; margin-top: 50px;">
+<main class="content">
+    <div class="container">
 
-    <div style="text-align: center; margin-bottom: 20px;">
-        <span style="font-size: 3rem;">👤</span>
-        <h2>Profil Pengguna</h2>
-        <p class="subtitle">Informasi akun yang sedang aktif</p>
-    </div>
+        <h1 class="page-title">Profil</h1>
+        <p class="page-subtitle">Informasi profil pengguna dan sekolah.</p>
+        <hr class="divider">
 
-    <hr style="margin-bottom: 20px;">
+        <div class="card">
+            <h2>👤 Profil</h2>
 
-    <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-        <div style="margin-bottom: 15px;">
-            <strong style="color: #4a5568;">Nama Lengkap:</strong>
-            <p style="font-size: 1.1rem; color: #2d3748; margin-top: 4px;">{{ Auth::user()->name }}</p>
+            @auth
+                <div style="margin-top:12px; line-height:1.9;">
+                    <p class="muted" style="margin:0;">
+                        <strong>Nama:</strong> {{ Auth::user()->name }}
+                    </p>
+                    <p class="muted" style="margin:0;">
+                        <strong>Username:</strong> {{ Auth::user()->username ?? '-' }}
+                    </p>
+                    <p class="muted" style="margin:0;">
+                        <strong>Role:</strong>
+                        <span style="background:#d99a22; color:white; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:600;">
+                            {{ Auth::user()->role ?? 'user' }}
+                        </span>
+                    </p>
+                    <p class="muted" style="margin:0;">
+                        <strong>Status:</strong>
+                        @if (Auth::user()->is_active)
+                            <span style="color:#28a745; font-weight:600;">● Aktif</span>
+                        @else
+                            <span style="color:#dc3545; font-weight:600;">● Nonaktif</span>
+                        @endif
+                    </p>
+                </div>
+
+                <div class="action-buttons" style="margin-top:20px; padding-top:16px; border-top:1px solid #eee;">
+                    <form action="{{ route('logout') }}" method="POST" style="margin:0;">
+                        @csrf
+                        <button type="submit" class="btn-action btn-danger">
+                            🚪 Logout
+                        </button>
+                    </form>
+                </div>
+            @else
+                <p class="muted">
+                    Anda belum login. Silakan
+                    <a href="{{ route('login') }}">masuk</a> terlebih dahulu.
+                </p>
+            @endauth
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <strong style="color: #4a5568;">username:</strong>
-            <p style="font-size: 1.1rem; color: #2d3748; margin-top: 4px;">{{ Auth::user()->username }}</p>
-        </div>
-
-        <div style="margin-bottom: 25px;">
-            <strong style="color: #4a5568;">Hak Akses (Role):</strong>
-            <p style="font-size: 1.1rem; text-transform: uppercase; font-weight: bold; color: #2b6cb0; margin-top: 4px;">
-                {{ Auth::user()->role }}
-            </p>
-        </div>
-
-        <!-- Tombol Logout -->
-        <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button type="submit" style="width: 100%; background-color: #e53e3e; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                Keluar (Logout)
-            </button>
-        </form>
     </div>
-
-    <div style="text-align: center; margin-top: 20px;">
-        <a href="{{ url('/') }}" style="color: #2b6cb0; text-decoration: none; font-size: 0.9rem;">
-            ← Kembali ke Beranda
-        </a>
-    </div>
-
-</div>
+</main>
 @endsection

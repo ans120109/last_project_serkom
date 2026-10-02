@@ -2,70 +2,75 @@
 
 @section('title', 'Berita & Pengumuman')
 
-@push('styles')
-<style>
-    .berita-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
-                   margin-bottom: 12px; font-size: 13px; color: #4b5563; }
-    .berita-meta .meta-item { display: inline-flex; align-items: center; gap: 5px; }
-    .berita-meta strong { color: #0d1b3e; font-weight: 600; }
-    .badge-jenis { display: inline-block; padding: 3px 10px; border-radius: 999px;
-                   font-size: 12px; font-weight: 600; background: #fef3c7; color: #92400e; }
-    .badge-jenis.pengumuman { background: #dbeafe; color: #1e40af; }
-</style>
-@endpush
-
 @section('content')
-    <h1 class="page-title">Berita & Pengumuman</h1>
-    <p class="page-subtitle">Informasi terbaru dari SMA Cendekia Nusantara.</p>
+<main class="content">
+    <div class="container">
 
-    @auth
-        <a href="{{ route('berita.create') }}" class="btn">+ Tambah Berita</a>
-    @endauth
-
-    <hr class="divider">
-
-    @if(session('success'))
-        <div class="card" style="background:#dcfce7;color:#166534">{{ session('success') }}</div>
-    @endif
-
-    {{-- Variabel $berita dikirim oleh BeritaController@index (sudah eager-load relasi penulis) --}}
-    @forelse($berita as $b)
-        <div class="card">
-            <h2>{{ $b->judul }}</h2>
-
-            <div class="berita-meta">
-                <span class="badge-jenis {{ $b->jenis === 'Pengumuman' ? 'pengumuman' : '' }}">
-                    {{ $b->jenis }}
-                </span>
-                <span class="meta-item">
-                    Tanggal: <strong>{{ $b->tanggal?->translatedFormat('d F Y') ?? '-' }}</strong>
-                </span>
-                <span class="meta-item">
-                    Diinput oleh: <strong>{{ $b->penulis->name ?? 'Tidak diketahui' }}</strong>
-                    ({{ $b->penulis->username ?? '-' }})
-                </span>
-                <span class="meta-item">
-                    Pada: <strong>{{ $b->created_at?->translatedFormat('d F Y, H:i') ?? '-' }}</strong>
-                </span>
+        {{-- Header --}}
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+            <div>
+                <h1 class="page-title">Berita & Pengumuman</h1>
+                <p class="page-subtitle">Daftar berita terbaru dari sekolah.</p>
             </div>
+            <a href="{{ route('berita.create') }}" class="btn-action">
+                + Tambah Berita
+            </a>
+        </div>
 
-            <p>{{ \Illuminate\Support\Str::limit($b->isi, 250) }}</p>
+        <hr class="divider">
 
-            @auth
-                <div style="margin-top:14px;display:flex;gap:8px">
-                    <a href="{{ route('berita.edit', $b->id) }}" class="btn btn-outline">Edit</a>
-                    <form action="{{ route('berita.destroy', $b->id) }}" method="POST"
-                          onsubmit="return confirm('Hapus berita ini?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">Hapus</button>
-                    </form>
+        {{-- Alert sukses --}}
+        @if (session('success'))
+            <div class="alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        {{-- Daftar Berita --}}
+        @forelse ($berita as $item)
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
+
+                    {{-- Kiri: Teks --}}
+                    <div style="flex:1; min-width:0;">
+                        <h2>{{ $item->judul }}</h2>
+
+                        <p class="muted" style="margin-bottom: 8px;">
+                            {{ $item->penulis ?? 'Admin' }}
+                            &middot;
+                            {{ optional($item->tanggal)->format('d M Y') }}
+                        </p>
+
+                        <p class="muted" style="margin-bottom: 0;">
+                            {{ \Illuminate\Support\Str::limit(strip_tags($item->isi), 150) }}
+                        </p>
+                    </div>
+
+                    {{-- Kanan: Tombol Aksi --}}
+                    <div class="action-buttons" style="margin-top:0; flex-shrink:0;">
+                        <a href="{{ route('berita.edit', $item->id) }}" class="btn-action">
+                            Edit
+                        </a>
+
+                        <form action="{{ route('berita.destroy', $item->id) }}"
+                              method="POST"
+                              onsubmit="return confirm('Yakin hapus berita ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn-action btn-danger">
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
-            @endauth
-        </div>
-    @empty
-        <div class="card">
-            <p class="muted">Belum ada berita atau pengumuman.</p>
-        </div>
-    @endforelse
+            </div>
+        @empty
+            <div class="card">
+                <p class="muted">Belum ada berita. Klik <strong>+ Tambah Berita</strong> untuk memulai.</p>
+            </div>
+        @endforelse
+
+    </div>
+</main>
 @endsection

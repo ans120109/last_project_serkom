@@ -1,117 +1,129 @@
 @extends('layout.app')
 
-@section('title', 'Profil Sekolah')
-
-@push('styles')
-<style>
-    .ps-wrap { max-width: 860px; margin: 0 auto; }
-
-    /* Banner. Selector dibuat spesifik supaya tidak tertimpa ".content h1" di style.css */
-    .ps-hero { position: relative; overflow: hidden; background: #12234f; padding: 60px 75px; color: #fff; }
-    .ps-hero.has-foto { background-size: cover; background-position: center; }
-    .ps-hero.has-foto::before { content: ''; position: absolute; inset: 0;
-        background: linear-gradient(90deg, rgba(10,22,58,.92), rgba(10,22,58,.5)); }
-    .ps-hero > * { position: relative; }
-    .ps-hero .ps-label { color: #e8a317; font-size: 12px; letter-spacing: 2px; font-weight: 700; }
-    .content .ps-hero h1 { color: #fff; font-size: 34px; font-weight: 700; margin: 12px 0; }
-    .content .ps-hero p { color: #d5dbee; max-width: 520px; font-size: 14px; margin: 0; }
-
-    .ps-head { display: flex; justify-content: space-between; align-items: flex-end; margin: 50px 0 20px; }
-    .ps-head small { color: #e8a317; font-size: 11px; letter-spacing: 2px; font-weight: 700; }
-    .ps-head h2 { margin: 4px 0 0; font-size: 26px; color: #0b1a3f; }
-    .ps-btn-edit { background: #e8a317; color: #0b1a3f; padding: 9px 16px; border-radius: 8px;
-        font-weight: 700; font-size: 13px; text-decoration: none; }
-
-    .ps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .ps-card { display: flex; gap: 14px; background: #fff; border-radius: 10px; padding: 16px;
-        box-shadow: 0 1px 5px rgba(0,0,0,.07); }
-    .ps-icon { flex: 0 0 42px; height: 42px; border-radius: 10px; background: #fdf0d3;
-        display: flex; align-items: center; justify-content: center; font-size: 20px; }
-    .ps-card h4 { margin: 0 0 4px; font-size: 13px; color: #0b1a3f; }
-    .ps-card p, .ps-card li { margin: 0; font-size: 13px; color: #555; list-style: none; }
-    .ps-card ul { margin: 0; padding: 0; }
-    .ps-foto { margin-top: 15px; background: #fff; border-radius: 10px; padding: 16px;
-        box-shadow: 0 1px 5px rgba(0,0,0,.07); }
-    .ps-foto h4 { margin: 0 0 10px; font-size: 13px; color: #0b1a3f; }
-    .ps-foto img { display: block; width: 100%; max-height: 380px; object-fit: cover; border-radius: 10px; }
-
-    @media (max-width: 700px) {
-        .ps-grid { grid-template-columns: 1fr; }
-        .ps-hero { padding: 40px 24px; }
-    }
-</style>
-@endpush
+@section('title', 'Profile Sekolah')
 
 @section('content')
-<div class="ps-wrap">
+<main class="content">
+    <div class="container">
+        <h1 class="page-title">Profile Sekolah</h1>
+        <p class="page-subtitle">Informasi lengkap tentang {{ $profil->nama_sekolah }}.</p>
+        <hr class="divider">
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
-    <div class="ps-hero {{ $profil->foto ? 'has-foto' : '' }}"
-         @if($profil->foto) style="background-image: url('{{ $profil->foto_url }}');" @endif>
-        <span class="ps-label">PROFIL SEKOLAH</span>
-        <h1>{{ $profil->nama }}</h1>
-        <p>Mewujudkan generasi yang berkarakter, berprestasi, kreatif, dan siap menghadapi perkembangan zaman.</p>
-    </div>
-
-    <div class="ps-head">
-        <div>
-            <small>IDENTITAS</small>
-            <h2>Profil Sekolah</h2>
-        </div>
-
-        {{-- Tombol edit hanya muncul untuk admin & operator yang sudah login --}}
-        @if(auth()->check() && in_array(auth()->user()->role, ['admin', 'operator']))
-            <a href="{{ route('profile-sekolah.edit') }}" class="ps-btn-edit">Edit Profil &amp; Foto</a>
+        @if (session('success'))
+            <div class="alert-success">{{ session('success') }}</div>
         @endif
-    </div>
 
-    <div class="ps-grid">
-        <div class="ps-card">
-            <div class="ps-icon">🏫</div>
-            <div><h4>Nama Sekolah</h4><p>{{ $profil->nama }}</p></div>
+        @if ($profil->foto)
+            <div class="card" style="padding:0; overflow:hidden;">
+                <img src="{{ asset('storage/' . $profil->foto) }}"
+                     alt="{{ $profil->nama_sekolah }}"
+                     style="width:100%; max-height:300px; object-fit:cover; display:block;">
+            </div>
+        @endif
+
+        <div class="card">
+            <h2>🏫 Tentang Sekolah</h2>
+            <p class="muted" style="line-height:1.8;">
+                {!! nl2br(e($profil->tentang ?? 'Belum ada deskripsi.')) !!}
+            </p>
         </div>
 
-        <div class="ps-card">
-            <div class="ps-icon">📍</div>
-            <div><h4>Alamat</h4><p>{{ $profil->alamat }}</p></div>
+        <div class="card">
+            <h2>🎯 Visi & Misi</h2>
+
+            @if ($profil->visi)
+                <h3 style="color:#d99a22; font-size:16px; margin:12px 0 6px;">Visi</h3>
+                <p class="muted" style="font-style:italic;">"{{ $profil->visi }}"</p>
+            @endif
+
+            @if ($profil->misi)
+                <h3 style="color:#d99a22; font-size:16px; margin:16px 0 6px;">Misi</h3>
+                <ol class="muted" style="padding-left:20px; line-height:1.9;">
+                    @foreach (explode("\n", $profil->misi) as $misi)
+                        @if (trim($misi))
+                            <li>{{ trim($misi) }}</li>
+                        @endif
+                    @endforeach
+                </ol>
+            @endif
         </div>
 
-        <div class="ps-card">
-            <div class="ps-icon">🎓</div>
-            <div><h4>Jenjang</h4><p>{{ $profil->jenjang }}</p></div>
+        <div class="card">
+            <h2>📊 Statistik Sekolah</h2>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:16px; margin-top:16px;">
+                <div style="background:#f7f5ef; border-radius:8px; padding:20px; text-align:center;">
+                    <div style="font-size:28px; font-weight:bold; color:#d99a22;">
+                        {{ $profil->jumlah_siswa ?? 0 }}+
+                    </div>
+                    <div class="muted" style="font-size:13px;">Siswa Aktif</div>
+                </div>
+
+                <div style="background:#f7f5ef; border-radius:8px; padding:20px; text-align:center;">
+                    <div style="font-size:28px; font-weight:bold; color:#d99a22;">
+                        {{ $profil->tahun_berdiri ?? '-' }}
+                    </div>
+                    <div class="muted" style="font-size:13px;">Tahun Berdiri</div>
+                </div>
+
+                <div style="background:#f7f5ef; border-radius:8px; padding:20px; text-align:center;">
+                    <div style="font-size:22px; font-weight:bold; color:#d99a22;">
+                        {{ $profil->jenjang ?? '-' }}
+                    </div>
+                    <div class="muted" style="font-size:13px;">Jenjang</div>
+                </div>
+            </div>
         </div>
 
-        <div class="ps-card">
-            <div class="ps-icon">📅</div>
-            <div><h4>Tahun Berdiri</h4><p>{{ $profil->tahun_berdiri }}</p></div>
-        </div>
-
-        <div class="ps-card">
-            <div class="ps-icon">👥</div>
-            <div><h4>Jumlah Siswa</h4><p>{{ $profil->jumlah_siswa }}</p></div>
-        </div>
-
-        <div class="ps-card">
-            <div class="ps-icon">🏆</div>
-            <div>
-                <h4>Prestasi</h4>
-                <ul>
-                    @foreach(preg_split('/\r\n|\r|\n/', (string) $profil->prestasi, -1, PREG_SPLIT_NO_EMPTY) as $prestasi)
-                        <li>{{ $prestasi }}</li>
+        @if ($profil->prestasi)
+            <div class="card">
+                <h2>🏆 Prestasi</h2>
+                <ul class="muted" style="padding-left:20px; line-height:1.9; margin-top:12px;">
+                    @foreach (explode("\n", $profil->prestasi) as $p)
+                        @if (trim($p))
+                            <li>{{ trim($p) }}</li>
+                        @endif
                     @endforeach
                 </ul>
             </div>
-        </div>
-    </div>
+        @endif
 
-    @if($profil->foto)
-        <div class="ps-foto">
-            <h4>Foto Sekolah</h4>
-            <img src="{{ $profil->foto_url }}" alt="Foto {{ $profil->nama }}">
+        <div class="card">
+            <h2>📞 Kontak & Lokasi</h2>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-top:16px;">
+                <div style="display:flex; gap:12px;">
+                    <span style="font-size:22px;">📍</span>
+                    <div>
+                        <strong style="font-size:14px; color:#0d1b3e;">Alamat</strong>
+                        <p class="muted" style="font-size:14px; margin-top:2px;">
+                            {{ $profil->alamat ?? 'Belum diisi' }}
+                        </p>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:12px;">
+                    <span style="font-size:22px;">📅</span>
+                    <div>
+                        <strong style="font-size:14px; color:#0d1b3e;">Tahun Berdiri</strong>
+                        <p class="muted" style="font-size:14px; margin-top:2px;">
+                            {{ $profil->tahun_berdiri ?? '-' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-    @endif
-</div>
+
+        @auth
+            @if (Auth::user()->role === 'admin' || Auth::user()->role === 'operator')
+                <div class="action-buttons" style="margin-top:20px;">
+                    <a href="{{ route('profile-sekolah.edit') }}" class="btn-action">
+                        ✏️ Edit Profile Sekolah
+                    </a>
+                </div>
+            @endif
+        @endauth
+
+    </div>
+</main>
 @endsection

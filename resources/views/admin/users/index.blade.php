@@ -1,112 +1,143 @@
 @extends('layout.app')
 
+@section('title', 'Data User')
+
 @section('content')
-<style>
-    .du-wrap { max-width: 825px; margin: 0 auto; padding: 30px 0 60px; }
-    .du-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
-    .du-head h1 { margin: 0; font-size: 26px; font-weight: 500; color: #111; }
-    .du-head p { margin: 8px 0 0; font-size: 13px; color: #777; }
-    .du-btn-add { background: #d99a1e; color: #fff; padding: 9px 14px; border-radius: 6px;
-                  font-size: 12px; font-weight: 700; text-decoration: none; }
-    .du-btn-add:hover { background: #c58916; }
+<main class="content">
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div>
+                <h1 class="page-title">Data User</h1>
+                <p class="page-subtitle">Manajemen akun pengguna sistem.</p>
+            </div>
 
-    .du-alert { padding: 12px 16px; border-radius: 6px; font-size: 14px; margin-bottom: 16px; }
-    .du-alert-success { background: #dcfce7; color: #166534; }
-    .du-alert-error { background: #fee2e2; color: #991b1b; }
-
-    .du-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,.06); overflow: hidden; }
-    .du-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .du-table th { background: #f3f6f9; text-align: left; padding: 16px 12px; font-weight: 700; color: #111; }
-    .du-table td { padding: 14px 12px; border-top: 1px solid #edf0f3; color: #222; vertical-align: middle; }
-
-    .du-badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
-    .du-badge-active { background: #dcfce7; color: #166534; }
-    .du-badge-inactive { background: #fee2e2; color: #b91c1c; }
-
-    .du-last small { display: block; color: #888; font-size: 11px; margin-top: 2px; }
-    .du-last .du-old { color: #b91c1c; font-weight: 600; }
-
-    .du-actions { white-space: nowrap; }
-    .du-actions a, .du-actions button { font-size: 12px; font-weight: 600; color: #111;
-        text-decoration: underline; background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; }
-    .du-actions .du-delete { color: #b91c1c; margin-left: 12px; }
-    .du-actions form { display: inline; }
-</style>
-
-<div class="du-wrap">
-    <div class="du-head">
-        <div>
-            <h1>Data User</h1>
-            <p>Kelola akun admin, guru, dan siswa.</p>
+            @auth
+                @if (Auth::user()->role === 'admin')
+                    <a href="{{ route('admin.users.create') }}" class="btn-action">
+                        + Tambah User
+                    </a>
+                @endif
+            @endauth
         </div>
-        <a href="{{ route('admin.users.create') }}" class="du-btn-add">+ Tambah User</a>
+
+        <hr class="divider">
+        @if (session('success'))
+            <div class="alert-success">{{ session('success') }}</div>
+        @endif
+
+        @if (session('error'))
+            <div style="background:#f8d7da; color:#721c24; padding:12px 16px; border-radius:5px; margin-bottom:16px; border-left:4px solid #dc3545;">
+                {{ session('error') }}
+            </div>
+        @endif
+        <div class="card">
+            <h2>🔐 Daftar User</h2>
+
+            <div style="overflow-x:auto; margin-top:12px;">
+                <table style="width:100%; border-collapse:collapse; min-width:700px;">
+                    <thead>
+                        <tr style="background:#f7f5ef;">
+                            <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd; font-size:14px;">No</th>
+                            <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd; font-size:14px;">Nama</th>
+                            <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd; font-size:14px;">Username</th>
+                            <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd; font-size:14px;">Role</th>
+                            <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd; font-size:14px;">Status</th>
+
+                            @auth
+                                @if (Auth::user()->role === 'admin' || Auth::user()->role === 'operator')
+                                    <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd; font-size:14px;">Aksi</th>
+                                @endif
+                            @endauth
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($users ?? [] as $i => $user)
+                            <tr style="border-bottom:1px solid #eee;">
+                                <td style="padding:10px; font-size:14px;">{{ $i + 1 }}</td>
+                                <td style="padding:10px; font-size:14px;">{{ $user->name }}</td>
+                                <td style="padding:10px; font-size:14px;">{{ $user->username ?? '-' }}</td>
+                                <td style="padding:10px; font-size:14px;">
+                                    <span style="background:#d99a22; color:white; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600;">
+                                        {{ $user->role ?? 'user' }}
+                                    </span>
+                                </td>
+                                <td style="padding:10px; font-size:14px;">
+                                    @if ($user->is_active)
+                                        <span style="background:#28a745; color:white; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600;">
+                                            ● Aktif
+                                        </span>
+                                    @else
+                                        <span style="background:#dc3545; color:white; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600;">
+                                            ● Nonaktif
+                                        </span>
+                                    @endif
+                                </td>
+                                @auth
+                                    @if (Auth::user()->role === 'admin' || Auth::user()->role === 'operator')
+                                        <td style="padding:10px;">
+                                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+
+                                                @php
+                                                    $isOperator = Auth::user()->role === 'operator';
+                                                    $targetIsAdmin = $user->role === 'admin';
+                                                    // Operator tidak bisa edit user admin
+                                                    $canEdit = ! $isOperator || ! $targetIsAdmin;
+                                                @endphp
+
+                                                @if ($canEdit)
+                                                    <a href="{{ route('admin.users.edit', $user->id) }}"
+                                                       class="btn-action"
+                                                       style="font-size:12px; padding:4px 10px;">
+                                                        Edit
+                                                    </a>
+                                                @else
+                                                    <span style="font-size:12px; color:#999; padding:4px 10px;">
+                                                        (Admin - read only)
+                                                    </span>
+                                                @endif
+                                                @if (Auth::user()->role === 'admin' && $user->id !== Auth::id())
+                                                    <form action="{{ route('admin.users.destroy', $user->id) }}"
+                                                          method="POST"
+                                                          onsubmit="return confirm('Yakin hapus user ini?')"
+                                                          style="margin:0;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                                class="btn-action btn-danger"
+                                                                style="font-size:12px; padding:4px 10px;">
+                                                            Hapus
+                                                        </button>
+                                                    </form>
+                                                @endif
+
+                                            </div>
+                                        </td>
+                                    @endif
+                                @endauth
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" style="padding:20px; text-align:center; color:#888;">
+                                    Belum ada user.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- Info untuk operator --}}
+        @auth
+            @if (Auth::user()->role === 'operator')
+                <div style="background:#e7f3ff; border-left:4px solid #2196F3; padding:12px 16px; border-radius:5px; margin-top:16px;">
+                    <p style="margin:0; font-size:14px; color:#0d47a1;">
+                        ℹ️ Anda login sebagai <strong>Operator</strong>. Anda <strong>tidak bisa</strong> mengedit user dengan role <strong>Admin</strong> atau mengubah statusnya.
+                    </p>
+                </div>
+            @endif
+        @endauth
+
     </div>
-
-    @if (session('success'))
-        <div class="du-alert du-alert-success">{{ session('success') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="du-alert du-alert-error">{{ session('error') }}</div>
-    @endif
-
-    <div class="du-card">
-        <table class="du-table">
-            <thead>
-                <tr>
-                    <th>Nama</th>
-                    <th>Username</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Terakhir Aktif</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($users as $user)
-                    <tr>
-                        <td>{{ $user->name }}</td>
-                        <td>{{ $user->username }}</td>
-                        <td>{{ ucfirst($user->role) }}</td>
-
-                        <td>
-                            @if ($user->isInactive())
-                                <span class="du-badge du-badge-inactive">● Tidak Aktif</span>
-                            @else
-                                <span class="du-badge du-badge-active">● Aktif</span>
-                            @endif
-                        </td>
-
-                        <td class="du-last">
-                            @if ($user->last_active_at)
-                                <span class="{{ $user->isInactive() ? 'du-old' : '' }}">
-                                    {{ $user->last_active_at->translatedFormat('d F Y, H:i') }}
-                                </span>
-                                <small>{{ $user->last_active_at->diffForHumans() }}</small>
-                            @else
-                                <small>Belum tercatat</small>
-                            @endif
-                        </td>
-
-                        <td class="du-actions">
-                            <a href="{{ route('admin.users.edit', $user) }}">Edit</a>
-
-                            @if ($user->isInactive() && $user->id !== auth()->id())
-                                <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
-                                      onsubmit="return confirm('Hapus akun {{ $user->name }}?\nTerakhir aktif: {{ $user->last_active_at ? $user->last_active_at->translatedFormat('d F Y') : 'tidak tercatat' }}.\nTindakan ini tidak bisa dibatalkan.')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="du-delete">Hapus</button>
-                                </form>
-                            @endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" style="text-align:center;color:#888;padding:30px">Belum ada data user.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</div>
+</main>
 @endsection

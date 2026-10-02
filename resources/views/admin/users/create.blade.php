@@ -1,54 +1,117 @@
 @extends('layout.app')
 
-@section('title', 'Tambah User - Admin')
+@section('title', 'Tambah User')
 
 @section('content')
-<div class="user-form-container">
-    <h1>Tambah User</h1>
+<main class="content">
+    <div class="container">
 
-    <form action="{{ route('admin.users.store') }}" method="POST" class="user-form">
-        @csrf
-
-        <div class="form-group">
-            <label>Nama Lengkap</label>
-            <input type="text" name="name" value="{{ old('name') }}">
-            @error('name') <p class="form-error">{{ $message }}</p> @enderror
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div>
+                <h1 class="page-title">Tambah User</h1>
+                <p class="page-subtitle">Buat akun pengguna baru.</p>
+            </div>
+            <a href="{{ route('admin.users.index') }}" class="btn-action" style="background:#6c757d;">
+                ← Kembali
+            </a>
         </div>
 
-        <div class="form-group">
-            <label>Username</label>
-            <input type="text" name="username" value="{{ old('username') }}">
-            @error('username') <p class="form-error">{{ $message }}</p> @enderror
+        <hr class="divider">
+
+        @if ($errors->any())
+            <div style="background:#f8d7da; color:#721c24; padding:12px 16px; border-radius:5px; margin-bottom:16px;">
+                <ul style="margin:0; padding-left:20px;">
+                    @foreach ($errors->all() as $err)
+                        <li>{{ $err }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <div class="card">
+            <form action="{{ route('admin.users.store') }}" method="POST">
+                @csrf
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px;">
+                        Nama Lengkap <span style="color:red;">*</span>
+                    </label>
+                    <input type="text" name="name" value="{{ old('name') }}" required
+                           style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px;">
+                        Username <span style="color:red;">*</span>
+                    </label>
+                    <input type="text" name="username" value="{{ old('username') }}" required
+                           style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+                    <div>
+                        <label style="display:block; font-weight:600; margin-bottom:6px;">
+                            Password <span style="color:red;">*</span>
+                        </label>
+                        <input type="password" name="password" required
+                               style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:600; margin-bottom:6px;">
+                            Konfirmasi Password <span style="color:red;">*</span>
+                        </label>
+                        <input type="password" name="password_confirmation" required
+                               style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px;">
+                        Role <span style="color:red;">*</span>
+                    </label>
+                    <select name="role" required
+                            style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                        <option value="">-- Pilih Role --</option>
+                        <option value="admin"    {{ old('role') === 'admin'    ? 'selected' : '' }}>Admin</option>
+                        <option value="operator" {{ old('role') === 'operator' ? 'selected' : '' }}>Operator</option>
+                        <option value="user"     {{ old('role') === 'user'     ? 'selected' : '' }}>User</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom:20px; padding:16px; background:#f9f9f9; border-radius:6px;">
+                    <label style="display:block; font-weight:600; margin-bottom:10px;">
+                        Status Akun
+                    </label>
+
+                    @php
+                        $currentStatus = old('is_active', '1');
+                    @endphp
+
+                    <div style="display:flex; gap:20px; align-items:center;">
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="radio" name="is_active" value="1"
+                                   {{ $currentStatus == '1' ? 'checked' : '' }}>
+                            <span style="color:#28a745; font-weight:600;">● Aktif</span>
+                        </label>
+
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="radio" name="is_active" value="0"
+                                   {{ $currentStatus == '0' ? 'checked' : '' }}>
+                            <span style="color:#dc3545; font-weight:600;">● Nonaktif</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="action-buttons" style="margin-top:20px; padding-top:16px; border-top:1px solid #eee;">
+                    <button type="submit" class="btn-action">Simpan</button>
+                    <a href="{{ route('admin.users.index') }}" class="btn-action" style="background:#6c757d;">Batal</a>
+                </div>
+
+            </form>
         </div>
 
-        <div class="form-group">
-            <label>Role</label>
-            <select name="role">
-                <option value="">-- Pilih Role --</option>
-                <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
-                <option value="guru" {{ old('role') === 'guru' ? 'selected' : '' }}>Guru</option>
-                <option value="siswa" {{ old('role') === 'siswa' ? 'selected' : '' }}>Siswa</option>
-            </select>
-            @error('role') <p class="form-error">{{ $message }}</p> @enderror
-        </div>
-
-        <div class="form-group">
-            <label>Kata Sandi</label>
-            <input type="password" name="password">
-            @error('password') <p class="form-error">{{ $message }}</p> @enderror
-        </div>
-
-        <div class="form-group">
-            <label>Konfirmasi Kata Sandi</label>
-            <input type="password" name="password_confirmation">
-        </div>
-
-        <div class="form-actions">
-            <a href="{{ route('admin.users.index') }}" class="btn-secondary">Batal</a>
-            <button type="submit" class="btn-primary">Simpan</button>
-        </div>
-    </form>
-</div>
+    </div>
+</main>
 @endsection
 
 @push('styles')

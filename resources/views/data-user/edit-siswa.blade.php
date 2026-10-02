@@ -2,71 +2,118 @@
 
 @section('title', 'Edit Siswa')
 
-@push('styles')
-<style>
-    .form-card { background: #fff; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,.07);
-                 padding: 28px; max-width: 720px; }
-    .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-size: 14px; font-weight: 600; color: #0d1b3e; margin-bottom: 6px; }
-    .form-control { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px;
-                    font-family: Arial, Helvetica, sans-serif; font-size: 14px; background: #fff; }
-    .form-control:focus { outline: none; border-color: #d99a22; box-shadow: 0 0 0 3px rgba(217,154,34,.2); }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .is-invalid { border-color: #b91c1c; }
-    .error-text { color: #b91c1c; font-size: 13px; margin-top: 4px; }
-    .form-actions { display: flex; gap: 10px; margin-top: 8px; }
-    .form-actions .btn { padding: 11px 26px; font-size: 15px; }
-    .btn-batal { background: #e5e7eb; color: #374151 !important; }
-    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
-</style>
-@endpush
-
 @section('content')
-    <h1 class="page-title">Edit Siswa</h1>
-    <p class="page-subtitle">Ubah data siswa, lalu simpan perubahan.</p>
+<main class="content">
+    <div class="container">
 
-    <div class="form-card">
-        <form action="{{ route('siswa-guru.siswa.update', $siswa) }}" method="POST">
-            @csrf
-            @method('PUT')
-
-            <div class="form-group">
-                <label for="nama">Nama</label>
-                <input type="text" id="nama" name="nama" value="{{ old('nama', $siswa->nama) }}"
-                       class="form-control @error('nama') is-invalid @enderror" required>
-                @error('nama') <div class="error-text">{{ $message }}</div> @enderror
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div>
+                <h1 class="page-title">Edit Siswa</h1>
+                <p class="page-subtitle">Perbarui data siswa.</p>
             </div>
+            <a href="{{ route('siswa-guru.create') }}" class="btn-action" style="background:#6c757d;">
+                ← Kembali
+            </a>
+        </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="nis">NIS</label>
-                    <input type="text" id="nis" name="nis" value="{{ old('nis', $siswa->nis) }}"
-                           class="form-control @error('nis') is-invalid @enderror" required>
-                    @error('nis') <div class="error-text">{{ $message }}</div> @enderror
+        <hr class="divider">
+
+        @if ($errors->any())
+            <div style="background:#f8d7da; color:#721c24; padding:12px 16px; border-radius:5px; margin-bottom:16px;">
+                <ul style="margin:0; padding-left:20px;">
+                    @foreach ($errors->all() as $err)
+                        <li>{{ $err }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <div class="card">
+            <form action="{{ route('siswa-guru.siswa.update', $siswa->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div>
+                        <label style="font-weight:600; margin-bottom:6px; display:block;">
+                            NIS <span style="color:red;">*</span>
+                        </label>
+                        <input type="text" name="nis" value="{{ old('nis', $siswa->nis) }}" required
+                               style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                    </div>
+                    <div>
+                        <label style="font-weight:600; margin-bottom:6px; display:block;">
+                            Nama <span style="color:red;">*</span>
+                        </label>
+                        <input type="text" name="nama" value="{{ old('nama', $siswa->nama) }}" required
+                               style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="kelas">Kelas</label>
-                    <input type="text" id="kelas" name="kelas" value="{{ old('kelas', $siswa->kelas) }}"
-                           class="form-control @error('kelas') is-invalid @enderror" required>
-                    @error('kelas') <div class="error-text">{{ $message }}</div> @enderror
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-top:16px;">
+                    <div>
+                        <label style="font-weight:600; margin-bottom:6px; display:block;">
+                            Jenis Kelamin <span style="color:red;">*</span>
+                        </label>
+                        <select name="jenis_kelamin" required
+                                style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                            <option value="L" {{ old('jenis_kelamin', $siswa->jenis_kelamin) === 'L' ? 'selected' : '' }}>
+                                Laki-laki
+                            </option>
+                            <option value="P" {{ old('jenis_kelamin', $siswa->jenis_kelamin) === 'P' ? 'selected' : '' }}>
+                                Perempuan
+                            </option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-weight:600; margin-bottom:6px; display:block;">
+                            Kelas <span style="color:red;">*</span>
+                        </label>
+                        <input type="text" name="kelas" value="{{ old('kelas', $siswa->kelas) }}" required
+                               style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                    </div>
+                    <div>
+                        <label style="font-weight:600; margin-bottom:6px; display:block;">
+                            Sekolah Asal
+                        </label>
+                        <input type="text" name="sekolah_asal"
+                               value="{{ old('sekolah_asal', $siswa->sekolah_asal) }}"
+                               style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                    </div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="jenis_kelamin">Jenis Kelamin</label>
-                <select id="jenis_kelamin" name="jenis_kelamin"
-                        class="form-control @error('jenis_kelamin') is-invalid @enderror" required>
-                    <option value="L" {{ old('jenis_kelamin', $siswa->jenis_kelamin) === 'L' ? 'selected' : '' }}>Laki-laki</option>
-                    <option value="P" {{ old('jenis_kelamin', $siswa->jenis_kelamin) === 'P' ? 'selected' : '' }}>Perempuan</option>
-                </select>
-                @error('jenis_kelamin') <div class="error-text">{{ $message }}</div> @enderror
-            </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px;">
+                    <div>
+                        <label style="font-weight:600; margin-bottom:6px; display:block;">Tanggal Lahir</label>
+                        <input type="date" name="tanggal_lahir"
+                               value="{{ old('tanggal_lahir', optional($siswa->tanggal_lahir)->format('Y-m-d')) }}"
+                               style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                    </div>
+                    <div>
+                        <label style="font-weight:600; margin-bottom:6px; display:block;">No. HP</label>
+                        <input type="text" name="no_hp" value="{{ old('no_hp', $siswa->no_hp) }}"
+                               style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+                    </div>
+                </div>
 
-            <div class="form-actions">
-                <button type="submit" class="btn">Simpan Perubahan</button>
-                <a href="{{ route('siswa-guru.create') }}" class="btn btn-batal">Batal</a>
-            </div>
-        </form>
+                <div style="margin-top:16px;">
+                    <label style="font-weight:600; margin-bottom:6px; display:block;">Alamat</label>
+                    <textarea name="alamat" rows="3"
+                              style="width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;">{{ old('alamat', $siswa->alamat) }}</textarea>
+                </div>
+
+                <div class="action-buttons" style="margin-top:20px; padding-top:16px; border-top:1px solid #eee;">
+                    <button type="submit" class="btn-action">
+                        💾 Simpan Perubahan
+                    </button>
+                    <a href="{{ route('siswa-guru.create') }}" class="btn-action" style="background:#6c757d;">
+                        Batal
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
     </div>
+</main>
 @endsection

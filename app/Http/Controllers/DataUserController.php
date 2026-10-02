@@ -2,117 +2,135 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Guru;
 use App\Models\Siswa;
+use App\Models\Guru;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 class DataUserController extends Controller
 {
     public function create()
     {
-        return view('data-user.create', [
-            'siswas' => Siswa::latest()->get(),
-            'gurus'  => Guru::latest()->get(),
-        ]);
+        $siswa = Siswa::latest()->get();
+        $guru  = Guru::latest()->get();
+
+        return view('data-user.create', compact('siswa', 'guru'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'simpan' => 'required|in:siswa,guru',
+            'nis'            => 'required|string|max:20|unique:siswa,nis',
+            'nama'           => 'required|string|max:100',
+            'jenis_kelamin'  => 'required|in:L,P',
+            'kelas'          => 'required|string|max:20',
+            'sekolah_asal'   => 'nullable|string|max:100',   // ← TAMBAH
+            // 'jurusan'        => 'nullable|string|max:50',
+            'tanggal_lahir'  => 'nullable|date',
+            'alamat'         => 'nullable|string',
+            'no_hp'          => 'nullable|string|max:20',
         ]);
 
-        if ($request->simpan === 'siswa') {
-            $request->validate([
-                'siswa'                 => 'required|array|min:1',
-                'siswa.*.nama'          => 'required|string|max:255',
-                'siswa.*.nis'           => 'required|string|distinct|unique:siswas,nis',
-                'siswa.*.kelas'         => 'required|string|max:50',
-                'siswa.*.jenis_kelamin' => 'required|in:L,P',
-            ]);
+        Siswa::create($request->only([
+            'nis', 'nama', 'jenis_kelamin', 'kelas',
+            'sekolah_asal',     // ← TAMBAH di sini
+            'jurusan', 'tanggal_lahir', 'alamat', 'no_hp'
+        ]));
 
-            DB::transaction(function () use ($request) {
-                foreach ($request->siswa as $row) {
-                    Siswa::create($row);
-                }
-            });
-
-            $pesan = 'Data siswa berhasil disimpan.';
-        } else {
-            $request->validate([
-                'guru'                  => 'required|array|min:1',
-                'guru.*.nama'           => 'required|string|max:255',
-                'guru.*.nip'            => 'required|string|distinct|unique:gurus,nip',
-                'guru.*.mata_pelajaran' => 'required|string|max:255',
-                'guru.*.no_hp'          => 'nullable|string|max:20',
-            ]);
-
-            DB::transaction(function () use ($request) {
-                foreach ($request->guru as $row) {
-                    Guru::create($row);
-                }
-            });
-
-            $pesan = 'Data guru berhasil disimpan.';
-        }
-
-        return redirect()->route('siswa-guru.create')->with('success', $pesan);
+        return redirect()->route('siswa-guru.create')
+            ->with('success', 'Data siswa berhasil ditambahkan.');
     }
 
     public function editSiswa(Siswa $siswa)
-        {
-            return view('data-user.edit-siswa', compact('siswa'));
-        }
+    {
+        return view('data-user.edit-siswa', compact('siswa'));
+    }
 
-        public function updateSiswa(Request $request, Siswa $siswa)
-        {
-            $data = $request->validate([
-                'nama'          => 'required|string|max:255',
-                'nis'           => ['required', 'string', Rule::unique('siswas', 'nis')->ignore($siswa->id)],
-                'kelas'         => 'required|string|max:50',
-                'jenis_kelamin' => 'required|in:L,P',
-            ]);
+    public function updateSiswa(Request $request, Siswa $siswa)
+    {
+        $request->validate([
+            'nis'            => 'required|string|max:20|unique:siswa,nis,' . $siswa->id,
+            'nama'           => 'required|string|max:100',
+            'jenis_kelamin'  => 'required|in:L,P',
+            'kelas'          => 'required|string|max:20',
+            'sekolah_asal'   => 'nullable|string|max:100',   // ← TAMBAH
+            // 'jurusan'        => 'nullable|string|max:50',
+            'tanggal_lahir'  => 'nullable|date',
+            'alamat'         => 'nullable|string',
+            'no_hp'          => 'nullable|string|max:20',
+        ]);
 
-            $siswa->update($data);
+        $siswa->update($request->only([
+            'nis', 'nama', 'jenis_kelamin', 'kelas',
+            'sekolah_asal',     // ← TAMBAH di sini
+            'jurusan', 'tanggal_lahir', 'alamat', 'no_hp'
+        ]));
 
-            return redirect()->route('siswa-guru.create')->with('success', 'Data siswa berhasil diperbarui.');
-        }
+        return redirect()->route('siswa-guru.create')
+            ->with('success', 'Data siswa berhasil diperbarui.');
+    }
 
-        public function destroySiswa(Siswa $siswa)
-        {
-            $siswa->delete();
+    public function destroySiswa(Siswa $siswa)
+    {
+        $siswa->delete();
 
-            return redirect()->route('siswa-guru.create')->with('success', 'Data siswa berhasil dihapus.');
-        }
+        return redirect()->route('siswa-guru.create')
+            ->with('success', 'Data siswa berhasil dihapus.');
+    }
 
-        public function editGuru(Guru $guru)
-        {
-            return view('data-user.edit-guru', compact('guru'));
-        }
+    public function storeGuru(Request $request)
+    {
+        $request->validate([
+            'nip'             => 'required|string|max:20|unique:guru,nip',
+            'nama'            => 'required|string|max:100',
+            'jenis_kelamin'   => 'required|in:L,P',
+            'mata_pelajaran'  => 'nullable|string|max:100',
+            'jabatan'         => 'nullable|string|max:50',
+            'tanggal_lahir'   => 'nullable|date',
+            'alamat'          => 'nullable|string',
+            'no_hp'           => 'nullable|string|max:20',
+        ]);
 
-        public function updateGuru(Request $request, Guru $guru)
-        {
-            $data = $request->validate([
-                'nama'           => 'required|string|max:255',
-                'nip'            => ['required', 'string', Rule::unique('gurus', 'nip')->ignore($guru->id)],
-                'mata_pelajaran' => 'required|string|max:255',
-                'no_hp'          => 'nullable|string|max:20',
-            ]);
+        Guru::create($request->only([
+            'nip', 'nama', 'jenis_kelamin', 'mata_pelajaran', 'jabatan',
+            'tanggal_lahir', 'alamat', 'no_hp'
+        ]));
 
-            $guru->update($data);
+        return redirect()->route('siswa-guru.create')
+            ->with('success', 'Data guru berhasil ditambahkan.');
+    }
 
-            return redirect()->route('siswa-guru.create')->with('success', 'Data guru berhasil diperbarui.');
-        }
+    public function editGuru(Guru $guru)
+    {
+        return view('data-user.edit-guru', compact('guru'));
+    }
 
-        public function destroyGuru(Guru $guru)
-        {
-            $guru->delete();
+    public function updateGuru(Request $request, Guru $guru)
+    {
+        $request->validate([
+            'nip'             => 'required|string|max:20|unique:guru,nip,' . $guru->id,
+            'nama'            => 'required|string|max:100',
+            'jenis_kelamin'   => 'required|in:L,P',
+            'mata_pelajaran'  => 'nullable|string|max:100',
+            'jabatan'         => 'nullable|string|max:50',
+            'tanggal_lahir'   => 'nullable|date',
+            'alamat'          => 'nullable|string',
+            'no_hp'           => 'nullable|string|max:20',
+        ]);
 
-            return redirect()->route('siswa-guru.create')->with('success', 'Data guru berhasil dihapus.');
-        }
+        $guru->update($request->only([
+            'nip', 'nama', 'jenis_kelamin', 'mata_pelajaran', 'jabatan',
+            'tanggal_lahir', 'alamat', 'no_hp'
+        ]));
 
+        return redirect()->route('siswa-guru.create')
+            ->with('success', 'Data guru berhasil diperbarui.');
+    }
 
+    public function destroyGuru(Guru $guru)
+    {
+        $guru->delete();
 
+        return redirect()->route('siswa-guru.create')
+            ->with('success', 'Data guru berhasil dihapus.');
+    }
 }
